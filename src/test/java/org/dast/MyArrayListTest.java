@@ -292,7 +292,7 @@ class MyArrayListTest {
         System.out.println("\tPrinting templist... " + templist.toString());
         System.out.println("\tAdding templist to list using addAll(templist)");
         list.addAll(5,templist);
-//        assertTrue(list.containsAll(templist));
+        assertTrue(list.containsAll(templist));
         System.out.println("\tPrinting list... " + list.toString());
         System.out.println("Testing complete");
     }

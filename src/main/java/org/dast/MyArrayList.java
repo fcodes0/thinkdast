@@ -20,6 +20,19 @@ public class MyArrayList<T> implements List<T> {
         return size;
     }
 
+    private void checkInternalCapacity(int newsize){
+       if (newsize >= array.length){
+           try {
+               array = Arrays.copyOf(array, array.length * 2);
+           } catch (Exception e) {
+               System.err.println("Could not allocate new array");
+               throw new ArrayStoreException();
+           }
+       }
+       if(newsize >= array.length)
+           checkInternalCapacity(newsize);
+    }
+
     /**
      * @return true if list empty (i.e contains no elements)
      */
@@ -80,14 +93,7 @@ public class MyArrayList<T> implements List<T> {
      */
     @Override
     public boolean add(T t) {
-        if (size >= array.length) {
-            try {
-                array = Arrays.copyOf(array, array.length * 2);
-            } catch (Exception e) {
-                System.err.println("Could not allocate new array");
-                throw new ArrayStoreException();
-            }
-        }
+        checkInternalCapacity(size+1);
         array[size] = t;
         size++;
         return true;
@@ -138,9 +144,11 @@ public class MyArrayList<T> implements List<T> {
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
-        for(T e: c){
-            if(e != null){
-                add(index,e);
+
+        Object[] temp = c.toArray();
+        for(int i = temp.length-1;i >= 0;i--){
+            if(temp[i] != null){
+                add(index,(T)temp[i]);
             }
         }
         return true;
@@ -185,7 +193,7 @@ public class MyArrayList<T> implements List<T> {
     @Override
     public T get(int index) {
         if (index >= size || index < 0) {
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException(outOfBoundsErrMsg(index));
         }
         return array[index];
     }
@@ -204,7 +212,7 @@ public class MyArrayList<T> implements List<T> {
     public T set(int index, T element) {
         T old;
         if (index >= size || index < 0) {
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException(outOfBoundsErrMsg(index));
         }
         old = get(index);
         array[index] = element;
@@ -221,19 +229,23 @@ public class MyArrayList<T> implements List<T> {
     @Override
     public void add(int index, T element) {
         if (index > size || index < 0) {
-            throw new IndexOutOfBoundsException();
+            throw new IndexOutOfBoundsException(outOfBoundsErrMsg(index));
         }
 
-        // add element to get resizing
-        add(element);
+        checkInternalCapacity(size + 1);
 
-        // shift elements
-        for (int i = index; i < size; i++) {
-            array[i] = array[i + 1];
+        // shift elements right
+        for (int i = size+1; i > index; i--) {
+            array[i] = array[i-1];
         }
 
         // store element at index
         array[index] = element;
+        size++;
+    }
+
+    private String outOfBoundsErrMsg(int index) {
+        return "Index: "+index+" Size: "+size;
     }
 
     /**
